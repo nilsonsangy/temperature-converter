@@ -5,6 +5,8 @@ const conversor = require('./convert')
 const bodyParser = require('body-parser');
 const config = require('./config/system-life');
 const path = require('path');
+const pkgversion = require('./package.json').version;
+
 
 app.use(config.middlewares.healthMid);
 app.use('/', config.routers);
@@ -16,19 +18,19 @@ app.get('/fahrenheit/:valor/celsius', (req, res) => {
 
     let valor = req.params.valor;
     let celsius = conversor.fahrenheitCelsius(valor);
-    res.json({ "celsius": celsius, "maquina": os.hostname() });
+    res.json({ "celsius": celsius, "maquina": os.hostname(), pkgversion});
 });
 
 app.get('/celsius/:valor/fahrenheit', (req, res) => {
 
     let valor = req.params.valor;
     let fahrenheit = conversor.celsiusFahrenheit(valor);
-    res.json({ "fahrenheit": fahrenheit, "maquina": os.hostname() });
+    res.json({ "fahrenheit": fahrenheit, "maquina": os.hostname(), pkgversion});
 });
 
 app.get('/', (req, res) => {
 
-    res.render('index',{valorConvertido: '', maquina: os.hostname()});
+    res.render('index',{valorConvertido: '', maquina: os.hostname(), pkgversion});
 });
 
 app.post('/', (req, res) => {
@@ -41,8 +43,7 @@ app.post('/', (req, res) => {
             resultado = conversor.fahrenheitCelsius(req.body.valorRef)
         }
     }
-
-    res.render('index', {valorConvertido: resultado, "maquina": os.hostname()});
+    res.render('index', {valorConvertido: resultado, "maquina": os.hostname(), pkgversion});
  });
 
 app.listen(8080, () => {
