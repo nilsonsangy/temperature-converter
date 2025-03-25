@@ -58,7 +58,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: nilsonsangy/conversor:v1.0.1
+          image: nilsonsangy/temperature-converter:v1.0
           resources:
             limits:
               memory: "128Mi"
