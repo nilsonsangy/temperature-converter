@@ -88,7 +88,7 @@ Log out and log in again to activate the docker group.
 
 1. **Build the image:**
 	```bash
-	docker build -t nilsonsangy/conversor:v1.0 .
+	docker build -t [dockerhub-user]/temperature-converter:v1.0 .
 	```
 2. **Login to Docker Hub:**
 	```bash
@@ -96,13 +96,13 @@ Log out and log in again to activate the docker group.
 	```
 3. **Push to Docker Hub:**
 	```bash
-	docker push nilsonsangy/conversor:v1.0
-	docker tag nilsonsangy/conversor:v1.0 nilsonsangy/conversor:latest
-	docker push nilsonsangy/conversor:latest
+	docker push [dockerhub-user]/temperature-converter:v1.0
+	docker tag [dockerhub-user]/temperature-converter:v1.0 [dockerhub-user]/temperature-converter:latest
+	docker push [dockerhub-user]/temperature-converter:latest
 	```
 4. **Run the image:**
 	```bash
-	docker run -p 8080:8080 nilsonsangy/conversor:latest
+	docker run -p 8080:8080 [dockerhub-user]/temperature-converter:latest
 	```
 
 ---
@@ -122,12 +122,10 @@ If you find this project helpful and would like to support its development, cons
 
 | ☕ Support this project | ☕ Apoie este projeto |
 |------------------------|----------------------|
-| If this project helps you or you think it's cool, consider supporting:<br>💳 [PayPal](https://www.paypal.com/donate/?business=7CC3CMJVYYHAC&no_recurring=0&currency_code=BRL)<br>![PayPal QR code](https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://www.paypal.com/donate/?business=7CC3CMJVYYHAC&no_recurring=0&currency_code=BRL) | If this project helps you or you think it's cool, consider supporting:<br>🇧🇷 Pix: `df92ab3c-11e2-4437-a66b-39308f794173`<br>![Pix QR code](https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=df92ab3c-11e2-4437-a66b-39308f794173) |
+| If this project helps you or you think it's cool, consider supporting:<br>💳 [PayPal](https://www.paypal.com/donate/?business=7CC3CMJVYYHAC&no_recurring=0&currency_code=BRL)<br>![PayPal QR code](https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://www.paypal.com/donate/?business=7CC3CMJVYYHAC&no_recurring=0&currency_code=BRL) | Se este projeto te ajudar ou você achar legal, considere apoiar:<br>🇧🇷 Pix: `df92ab3c-11e2-4437-a66b-39308f794173`<br>![Pix QR code](https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=df92ab3c-11e2-4437-a66b-39308f794173) |
 
 ---
 
 ## Author
-
-Nilson Sangy
 
 Nilson Sangy
