@@ -64,7 +64,7 @@ spec:
               memory: "128Mi"
               cpu: "500m"
           ports:
-            - containerPort: 8080
+            - containerPort: 80
           env:
             - name: DB_DATABASE
               value: "portal"
@@ -84,8 +84,8 @@ metadata:
 spec:
   selector:
     app: web
+  type: LoadBalancer
   ports:
     - port: 80
-      targetPort: 8080
-      nodePort: 30000
-  type: NodePort
+      targetPort: 80
+      # nodePort: 30000
