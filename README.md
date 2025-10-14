@@ -107,15 +107,6 @@ Log out and log in again to activate the docker group.
 
 ---
 
-## 🧪 Tests
-
-To run tests:
-```bash
-npm test
-```
-
----
-
 ## 💸 Donations
 
 If you find this project helpful and would like to support its development, consider making a donation. Your contribution helps keep this toolkit updated and motivates further improvements!
