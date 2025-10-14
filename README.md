@@ -107,7 +107,41 @@ Log out and log in again to activate the docker group.
 
 ---
 
-## 💸 Donations
+## 🔍 Scan the Docker image with Trivy
+
+Basic steps to check the image for vulnerabilities using Trivy.
+
+1) Scan the image:
+
+```bash
+trivy image [dockerhub-user]/temperature-converter:latest
+```
+
+2) Show only High/Critical severities and fail the process (useful for CI):
+
+```bash
+trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 [dockerhub-user]/temperature-converter:latest
+```
+
+3) Optional: export a JSON report:
+
+```bash
+trivy image -f json -o trivy-report.json [dockerhub-user]/temperature-converter:latest
+```
+
+Notes:
+- On first use, Trivy downloads its vulnerability database (requires internet).
+- You can also run Trivy via container without installing it locally:
+	```bash
+	docker run --rm \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $HOME/.cache/trivy:/root/.cache/ \
+		aquasec/trivy:latest image [dockerhub-user]/temperature-converter:latest
+	```
+
+---
+
+## �💸 Donations
 
 If you find this project helpful and would like to support its development, consider making a donation. Your contribution helps keep this toolkit updated and motivates further improvements!
 
