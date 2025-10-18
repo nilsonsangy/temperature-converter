@@ -2,146 +2,268 @@
 
 # 🌡️ Temperature Converter
 
-**A simple and container-ready temperature conversion toolkit (Celsius ↔ Fahrenheit) with web and REST API**
+**A modern, container-ready temperature conversion application (Celsius ↔ Fahrenheit) with web interface, REST API, and PostgreSQL persistence**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/node.js-18.x-green.svg)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/node.js-24.x-green.svg)](https://nodejs.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey)](https://github.com/nilsonsangy/temperature-converter)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
 
-*Convert temperatures easily, run anywhere, and deploy with Docker or Kubernetes!*
+*Convert temperatures easily, persist conversion history, and deploy anywhere with Docker or Kubernetes!*
 
 </div>
 
 ---
 
-## About the Project
+## 🚀 Features
 
-This project is a temperature converter built with Node.js, featuring a web interface and REST API. It is designed for easy containerization with Docker and orchestration with Kubernetes.
+- **🌡️ Temperature Conversion**: Convert between Celsius and Fahrenheit via web interface and REST API
+- **💾 Persistent History**: PostgreSQL database stores the last 10 conversions
+- **🎨 Modern UI**: Clean, responsive Bootstrap interface showing conversion history
+- **🔄 REST API**: Programmatic access to conversion functions
+- **🐳 Docker Ready**: Complete Docker Compose setup for development
+- **☸️ Kubernetes Ready**: Production-ready Kubernetes manifests
+- **📊 Real-time Display**: View latest conversions in a beautiful table format
 
-## Features
+## 📁 Project Structure
 
-- Convert between Celsius and Fahrenheit via web interface and REST API.
-- Automated tests for conversion functions.
-- Ready for Docker containerization.
-- Kubernetes manifests for backend and PostgreSQL database deployment.
-
-## Project Structure
-
-- `src/` — Application source code:
-  - `server.js`: Main Express server, handles web routes and API endpoints.
-  - `convert.js`: Contains temperature conversion logic (Celsius ↔ Fahrenheit).
-  - `views/index.ejs`: Web interface for user input and displaying results.
-  - `config/system-life.js`: Health and readiness endpoints for container orchestration.
-  - `test/convert.js`: Automated tests for conversion functions.
-- `k8s/` — Kubernetes deployment manifests:
-  - `deploy.yaml`: Deploys PostgreSQL and the web application, exposes services.
-- `Dockerfile` — Docker image build configuration.
-- `README.md` — Project documentation.
-
----
-
-## 🚀 Docker Installation
-
-### Linux
-```bash
-sudo apt update
-sudo apt install -y ca-certificates curl gnupg
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io
-sudo usermod -aG docker $USER
 ```
-Log out and log in again to activate the docker group.
-
-### Windows (WSL2, without Docker Desktop)
-1. Install WSL2 and Ubuntu from Microsoft Store.
-2. In Ubuntu/WSL, run the Linux commands above.
-3. Start the Docker service in WSL:
-	```bash
-	sudo service docker start
-	```
-4. Test with:
-	```bash
-	docker run hello-world
-	```
-
----
-
-## 🏃‍♂️ Running Locally
-
-1. Install Node.js dependencies:
-	```bash
-	npm install
-	```
-2. Start the local server:
-	```bash
-	node src/server.js
-	```
-3. Access the web interface at `http://localhost:8080`.
-
----
-
-## 🐳 Build and Push Docker Image
-
-1. **Build the image:**
-	```bash
-	docker build -t [dockerhub-user]/temperature-converter:v1.0 .
-	```
-2. **Login to Docker Hub:**
-	```bash
-	docker login
-	```
-3. **Push to Docker Hub:**
-	```bash
-	docker push [dockerhub-user]/temperature-converter:v1.0
-	docker tag [dockerhub-user]/temperature-converter:v1.0 [dockerhub-user]/temperature-converter:latest
-	docker push [dockerhub-user]/temperature-converter:latest
-	```
-4. **Run the image:**
-	```bash
-	docker run -p 8080:8080 [dockerhub-user]/temperature-converter:latest
-	```
-
----
-
-## 🔍 Scan the Docker image with Trivy
-
-Basic steps to check the image for vulnerabilities using Trivy.
-
-1) Scan the image:
-
-```bash
-trivy image [dockerhub-user]/temperature-converter:latest
+temperature-converter/
+├── src/                     # Application source code
+│   ├── server.js           # Express server with API endpoints
+│   ├── convert.js          # Temperature conversion logic
+│   ├── database.js         # PostgreSQL connection and queries
+│   ├── views/index.ejs     # Web interface template
+│   ├── config/system-life.js # Health and readiness endpoints
+│   ├── test/convert.js     # Automated tests
+│   ├── package.json        # Node.js dependencies
+│   └── Dockerfile          # Container build configuration
+├── k8s/                    # Kubernetes deployment manifests
+│   └── deploy.yaml         # PostgreSQL and app deployment
+├── docker-compose.yml      # Local development environment
+├── init.sql               # Database initialization script
+├── dev.sh                 # Development helper script
+└── README.md              # This file
 ```
 
-2) Show only High/Critical severities and fail the process (useful for CI):
+---
 
-```bash
-trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 [dockerhub-user]/temperature-converter:latest
-```
+## 🏃‍♂️ Quick Start
 
-3) Optional: export a JSON report:
+### Option 1: Docker Compose (Recommended for Development)
 
-```bash
-trivy image -f json -o trivy-report.json [dockerhub-user]/temperature-converter:latest
-```
+1. **Start the application:**
+   ```bash
+   ./dev.sh start
+   ```
 
-Notes:
-- On first use, Trivy downloads its vulnerability database (requires internet).
-- You can also run Trivy via container without installing it locally:
-	```bash
-	docker run --rm \
-		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v $HOME/.cache/trivy:/root/.cache/ \
-		aquasec/trivy:latest image [dockerhub-user]/temperature-converter:latest
-	```
+2. **Access the application:**
+   - Web Interface: http://localhost:8080
+   - API: http://localhost:8080/celsius/25/fahrenheit
+
+3. **Stop the application:**
+   ```bash
+   ./dev.sh stop
+   ```
+
+### Option 2: Kubernetes (Recommended for Production)
+
+1. **Deploy to Kubernetes:**
+   ```bash
+   ./dev.sh k8s-deploy
+   ```
+
+2. **Check status:**
+   ```bash
+   ./dev.sh k8s-status
+   ```
+
+3. **Remove from Kubernetes:**
+   ```bash
+   ./dev.sh k8s-delete
+   ```
 
 ---
 
-## �💸 Donations
+## 🔧 Development Helper Script
+
+The `dev.sh` script provides convenient commands for development:
+
+```bash
+./dev.sh start       # Start with Docker Compose
+./dev.sh stop        # Stop Docker Compose
+./dev.sh logs        # Show application logs
+./dev.sh rebuild     # Rebuild and restart
+./dev.sh k8s-deploy  # Deploy to Kubernetes
+./dev.sh k8s-delete  # Remove from Kubernetes
+./dev.sh k8s-status  # Show Kubernetes status
+```
+
+---
+
+## 🌐 API Endpoints
+
+### Conversion Endpoints
+- `GET /celsius/{value}/fahrenheit` - Convert Celsius to Fahrenheit
+- `GET /fahrenheit/{value}/celsius` - Convert Fahrenheit to Celsius
+
+### Health Endpoints
+- `GET /health` - Application health check
+- `GET /ready` - Readiness probe
+- `PUT /unhealth` - Simulate unhealthy state
+- `PUT /unreadyfor/{seconds}` - Simulate not ready state
+
+### Example API Usage
+```bash
+# Convert 25°C to Fahrenheit
+curl http://localhost:8080/celsius/25/fahrenheit
+
+# Convert 77°F to Celsius  
+curl http://localhost:8080/fahrenheit/77/celsius
+```
+
+---
+
+## 💾 Database Schema
+
+The application uses PostgreSQL with the following schema:
+
+```sql
+CREATE TABLE conversions (
+    id SERIAL PRIMARY KEY,
+    original_value DECIMAL(10,2) NOT NULL,
+    converted_value DECIMAL(10,2) NOT NULL,
+    conversion_type VARCHAR(50) NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
+## 🐳 Docker Setup
+
+### Manual Docker Build
+```bash
+# Build the image
+docker build -t temperature-converter:latest ./src
+
+# Run with existing PostgreSQL
+docker run -p 8080:8080 \
+  -e DB_HOST=your-postgres-host \
+  -e DB_USERNAME=user \
+  -e DB_PASSWORD=password \
+  -e DB_DATABASE=temperature_db \
+  temperature-converter:latest
+```
+
+---
+
+## ☸️ Kubernetes Configuration
+
+The application is configured for Kubernetes with:
+
+- **PostgreSQL Deployment**: Persistent database with health checks
+- **App Deployment**: 3 replicas with resource limits
+- **LoadBalancer Service**: External access to the application
+- **Environment Variables**: Database connection configuration
+
+### Resource Requirements
+- **PostgreSQL**: 256Mi memory, 500m CPU
+- **Application**: 256Mi memory, 500m CPU per replica
+
+---
+
+## 🧪 Running Tests
+
+```bash
+cd src
+npm test
+```
+
+---
+
+## 🔍 Security Scanning
+
+Scan the Docker image for vulnerabilities using Trivy:
+
+```bash
+# Basic scan
+trivy image temperature-converter:latest
+
+# High/Critical only (CI-friendly)
+trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 temperature-converter:latest
+
+# JSON report
+trivy image -f json -o trivy-report.json temperature-converter:latest
+```
+
+---
+
+## 🛠️ Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_HOST` | `postgres` | PostgreSQL host |
+| `DB_PORT` | `5432` | PostgreSQL port |
+| `DB_USERNAME` | `user` | Database username |
+| `DB_PASSWORD` | `password123` | Database password |
+| `DB_DATABASE` | `temperature_db` | Database name |
+| `NODE_ENV` | `development` | Node.js environment |
+| `PORT` | `8080` | Application port |
+
+---
+
+## � Troubleshooting
+
+### Common Issues
+
+1. **Port already in use**
+   ```bash
+   # Check what's using port 8080
+   lsof -i :8080
+   
+   # Kill the process or use different port
+   docker-compose down && docker-compose up -d
+   ```
+
+2. **Database connection failed**
+   ```bash
+   # Check PostgreSQL logs
+   docker-compose logs postgres
+   
+   # Restart services
+   docker-compose restart
+   ```
+
+3. **Application won't start**
+   ```bash
+   # View application logs
+   docker-compose logs app
+   
+   # Rebuild if needed
+   ./dev.sh rebuild
+   ```
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes and test them
+4. Commit your changes: `git commit -m 'Add amazing feature'`
+5. Push to the branch: `git push origin feature/amazing-feature`
+6. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 💸 Donations
 
 If you find this project helpful and would like to support its development, consider making a donation. Your contribution helps keep this toolkit updated and motivates further improvements!
 
@@ -151,6 +273,9 @@ If you find this project helpful and would like to support its development, cons
 
 ---
 
-## Author
+## 👨‍💻 Author
 
-Nilson Sangy
+**Nilson Sangy**
+
+- GitHub: [@nilsonsangy](https://github.com/nilsonsangy)
+- Project Link: [https://github.com/nilsonsangy/temperature-converter](https://github.com/nilsonsangy/temperature-converter)

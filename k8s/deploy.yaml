@@ -1,42 +1,42 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgre
+  name: postgres
 spec:
   selector:
     matchLabels:
-      app: postgre
+      app: postgres
   template:
     metadata:
       labels:
-        app: postgre
+        app: postgres
     spec:
       containers:
-        - name: postgre
+        - name: postgres
           image: postgres:15.0
           resources:
             limits:
-              memory: "128Mi"
+              memory: "256Mi"
               cpu: "500m"
           ports:
             - containerPort: 5432
           env:
-            - name:  POSTGRES_USER
-              value: "usuario"
-            - name:  POSTGRES_PASSWORD
-              value: "laboratorionilson"
-            - name:  POSTGRES_DB
-              value: "portal"
+            - name: POSTGRES_USER
+              value: "user"
+            - name: POSTGRES_PASSWORD
+              value: "password123"
+            - name: POSTGRES_DB
+              value: "temperature_db"
 
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgre
+  name: postgres
 spec:
   selector:
-    app: postgre
+    app: postgres
   ports:
     - port: 5432
 
@@ -45,47 +45,47 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: web
+  name: temperature-converter
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: web
+      app: temperature-converter
   template:
     metadata:
       labels:
-        app: web
+        app: temperature-converter
     spec:
       containers:
-        - name: web
-          image: nilsonsangy/temperature-converter:v1.0
+        - name: temperature-converter
+          image: nilsonsangy/temperature-converter:v1.2
           resources:
             limits:
-              memory: "128Mi"
+              memory: "256Mi"
               cpu: "500m"
           ports:
-            - containerPort: 80
+            - containerPort: 8080
           env:
             - name: DB_DATABASE
-              value: "portal"
+              value: "temperature_db"
             - name: DB_USERNAME
-              value: "usuario"
+              value: "user"
             - name: DB_PASSWORD
-              value: "laboratorionilson"
+              value: "password123"
             - name: DB_HOST
-              value: postgre
+              value: postgres
 
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: web
+  name: temperature-converter
 spec:
   selector:
-    app: web
+    app: temperature-converter
   type: LoadBalancer
   ports:
-    - port: 80
-      targetPort: 80
+    - port: 8080
+      targetPort: 8080
       # nodePort: 30000

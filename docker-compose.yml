@@ -1,0 +1,50 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15.0
+    container_name: temperature-converter-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: temperature_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d temperature_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Temperature Converter Application
+  app:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    container_name: temperature-converter-app
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: user
+      DB_PASSWORD: password123
+      DB_DATABASE: temperature_db
+      NODE_ENV: production
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

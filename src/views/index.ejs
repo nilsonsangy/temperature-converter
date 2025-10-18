@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.87.0">
-    <title>Conversor de Temperatura</title>
+    <title>Temperature Converter</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.1/examples/sticky-footer-navbar/">
 
@@ -50,8 +50,8 @@
     <main class="flex-shrink-0">
         <div class="container" style="padding: 60px 15px 0;">
             <form class="row g-3" action="/" method="post">
-                <h1>Conversor de Temperatura</h1>
-                    <p>POD: <%= maquina %></p>
+                <h1>Temperature Converter</h1>
+                    <p>POD: <%= machine %></p>
                     <p>Version: <%= pkgversion %></p>
                 <div class="mb-3 row">
                     <select class="form-select" aria-label="Default select example" id="selectTemp" name="selectTemp">
@@ -60,17 +60,66 @@
                     </select>
                 </div>
                 <div class="mb-3 row">
-                    <label for="valorRef" class="form-label">Valor:</label>
-                    <input type="number" class="form-control" id="valorRef" name="valorRef">
+                    <label for="valueRef" class="form-label">Value:</label>
+                    <input type="number" class="form-control" id="valueRef" name="valueRef">
                 </div>
                 <div>
-                    <button type="submit" class="btn btn-primary mb-3">Converter</button>
+                    <button type="submit" class="btn btn-primary mb-3">Convert</button>
                 </div>
             </form>
-            <% if(valorConvertido){ %>
-                <h3>Valor Convertido</h3>
-                <%= valorConvertido %>
+            <% if(convertedValue){ %>
+                <h3>Converted Value</h3>
+                <%= convertedValue %>
              <% } %>            
+             
+             <!-- Latest conversions section -->
+             <% if(latestConversions && latestConversions.length > 0){ %>
+                <div class="mt-4">
+                    <h3>🕒 Latest 10 Conversions</h3>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Original Value</th>
+                                    <th>Converted Value</th>
+                                    <th>Conversion Type</th>
+                                    <th>Date/Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% latestConversions.forEach(function(conversion) { %>
+                                <tr>
+                                    <td><%= parseFloat(conversion.original_value).toFixed(1) %>°</td>
+                                    <td><%= parseFloat(conversion.converted_value).toFixed(1) %>°</td>
+                                    <td>
+                                        <% if(conversion.conversion_type.includes('Celsius to Fahrenheit')) { %>
+                                            <span class="badge bg-primary">°C → °F</span>
+                                        <% } else { %>
+                                            <span class="badge bg-success">°F → °C</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <%= new Date(conversion.timestamp).toLocaleString('en-US', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        }) %>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+             <% } else { %>
+                <div class="mt-4">
+                    <div class="alert alert-info" role="alert">
+                        📊 No conversions made yet. Make your first conversion!
+                    </div>
+                </div>
+             <% } %>
         </div>
     </main>
     <footer class="footer mt-auto py-3 bg-light">
