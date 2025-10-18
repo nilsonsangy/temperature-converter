@@ -17,6 +17,20 @@ case "$1" in
         echo "🚀 Deploying secure v2.1 version..."
         echo ""
         
+        # Check if secrets.yaml exists
+        if [ ! -f "k8s/secrets.yaml" ]; then
+            echo "❌ ERROR: k8s/secrets.yaml not found!"
+            echo ""
+            echo "📋 Setup Instructions:"
+            echo "1. Copy the template: cp k8s/secrets-example.yaml k8s/secrets.yaml"
+            echo "2. Edit k8s/secrets.yaml and replace placeholder values"
+            echo "3. Encode your values: echo -n 'your-value' | base64"
+            echo "4. Run this command again"
+            echo ""
+            echo "⚠️  SECURITY: Never commit k8s/secrets.yaml to git!"
+            exit 1
+        fi
+        
         echo "1️⃣ Applying Kubernetes Secrets..."
         kubectl apply -f k8s/secrets.yaml
         echo "✅ Secrets created successfully"
@@ -96,6 +110,38 @@ case "$1" in
         kubectl get pods -l app=temperature-converter
         ;;
         
+    "setup-secrets")
+        echo "🔐 Setting up Kubernetes Secrets..."
+        echo ""
+        
+        if [ -f "k8s/secrets.yaml" ]; then
+            echo "⚠️  k8s/secrets.yaml already exists!"
+            echo "Do you want to overwrite it? (y/N)"
+            read -r response
+            if [[ ! "$response" =~ ^[Yy]$ ]]; then
+                echo "❌ Setup cancelled"
+                exit 0
+            fi
+        fi
+        
+        echo "📋 Copying template file..."
+        cp k8s/secrets-example.yaml k8s/secrets.yaml
+        
+        echo "✅ Template copied to k8s/secrets.yaml"
+        echo ""
+        echo "📝 NEXT STEPS:"
+        echo "1. Edit k8s/secrets.yaml"
+        echo "2. Replace <BASE64_ENCODED_*> placeholders with actual values"
+        echo "3. Use this to encode values: echo -n 'your-value' | base64"
+        echo ""
+        echo "🔍 Example commands:"
+        echo "echo -n 'myuser' | base64     # For username"
+        echo "echo -n 'mypass123' | base64  # For password"
+        echo "echo -n 'mydb' | base64       # For database"
+        echo ""
+        echo "⚠️  SECURITY WARNING: Never commit k8s/secrets.yaml to git!"
+        ;;
+        
     "cleanup")
         echo "🧹 Cleaning up v2.1 deployment..."
         
@@ -131,11 +177,12 @@ case "$1" in
         echo "🔐 Secure Temperature Converter v2.1 Deployment"
         echo ""
         echo "Available commands:"
-        echo "  deploy    - Deploy v2.1 with enhanced security"
-        echo "  secrets   - View Kubernetes Secrets information"
-        echo "  verify    - Verify secure deployment"
-        echo "  compare   - Compare v2.0 vs v2.1 security"
-        echo "  cleanup   - Remove v2.1 deployment"
+        echo "  setup-secrets - Setup secrets.yaml from template (REQUIRED FIRST)"
+        echo "  deploy        - Deploy v2.1 with enhanced security"
+        echo "  secrets       - View Kubernetes Secrets information"
+        echo "  verify        - Verify secure deployment"
+        echo "  compare       - Compare v2.0 vs v2.1 security"
+        echo "  cleanup       - Remove v2.1 deployment"
         echo ""
         echo "Usage: ./deploy-v2.1.sh [command]"
         echo ""
