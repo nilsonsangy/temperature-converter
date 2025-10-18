@@ -62,8 +62,59 @@ case "$1" in
         echo ""
         echo "Services:"
         kubectl get services
+        echo ""
+        echo "🌐 Access URLs:"
+        EXTERNAL_IPS=$(kubectl get service temperature-converter -o jsonpath='{.status.loadBalancer.ingress[*].ip}' | tr ' ' '\n' | head -1)
+        NODEPORT=$(kubectl get service temperature-converter -o jsonpath='{.spec.ports[0].nodePort}')
+        
+        if [ ! -z "$EXTERNAL_IPS" ]; then
+            echo "  LoadBalancer External IP: http://$EXTERNAL_IPS:8080"
+        fi
+        
+        if [ ! -z "$NODEPORT" ]; then
+            echo "  NodePort (localhost): http://localhost:$NODEPORT"
+        fi
+        
+        echo "  Cluster IP: http://$(kubectl get service temperature-converter -o jsonpath='{.spec.clusterIP}'):8080"
         ;;
-    *)
+    "k8s-url")
+        echo "🌐 Getting application URLs..."
+        EXTERNAL_IPS=$(kubectl get service temperature-converter -o jsonpath='{.status.loadBalancer.ingress[*].ip}' | tr ' ' '\n' | head -1)
+        NODEPORT=$(kubectl get service temperature-converter -o jsonpath='{.spec.ports[0].nodePort}')
+        
+        echo "Available access methods:"
+        echo ""
+        if [ ! -z "$EXTERNAL_IPS" ]; then
+            echo "1. 🌍 External LoadBalancer IP:"
+            echo "   URL: http://$EXTERNAL_IPS:8080"
+            echo "   Use: External access (if supported by cluster)"
+            echo ""
+        fi
+        
+        if [ ! -z "$NODEPORT" ]; then
+            echo "2. 🚪 NodePort (Recommended for local clusters):"
+            echo "   URL: http://localhost:$NODEPORT"
+            echo "   Use: Access from your local machine"
+            echo ""
+        fi
+        
+        echo "3. 🔄 Port Forward (Always works):"
+        echo "   Command: kubectl port-forward service/temperature-converter 8080:8080"
+        echo "   URL: http://localhost:8080"
+        echo "   Use: Direct tunnel to the service"
+        echo ""
+        
+        echo "4. 🏠 Cluster IP (Internal only):"
+        echo "   URL: http://$(kubectl get service temperature-converter -o jsonpath='{.spec.clusterIP}'):8080"
+        echo "   Use: Only from within cluster"
+        ;;
+    "k8s-forward")
+        echo "🔄 Setting up port forwarding..."
+        echo "Access the application at: http://localhost:8080"
+        echo "Press Ctrl+C to stop"
+        kubectl port-forward service/temperature-converter 8080:8080
+        ;;
+    "*")
         echo "🌡️ Temperature Converter Development Helper"
         echo ""
         echo "Available commands:"
@@ -77,6 +128,8 @@ case "$1" in
         echo "  k8s-deploy  - Deploy to Kubernetes"
         echo "  k8s-delete  - Remove from Kubernetes"
         echo "  k8s-status  - Show Kubernetes status"
+        echo "  k8s-url     - Show all access URLs"
+        echo "  k8s-forward - Port forward to localhost:8080"
         echo ""
         echo "Usage: ./dev.sh [command]"
         ;;
