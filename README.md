@@ -15,6 +15,43 @@
 
 ---
 
+## 🎓 Educational Purpose & Version Overview
+
+**This application is specifically designed for educational purposes in container orchestration security training and workshops.**
+
+### 📚 Learning Objectives
+
+This project serves as a hands-on learning tool for:
+- **Container Security**: Understanding vulnerabilities in containerized applications
+- **Kubernetes Security**: Exploring security scanning, monitoring, and best practices
+- **DevSecOps Workflows**: Integrating security tools (Snyk, Trivy, Falco) into CI/CD pipelines
+- **Database Security**: Analyzing connection patterns and credential management
+
+### 🔖 Version Differences
+
+| Version | Database | Security Status | Use Case |
+|---------|----------|-----------------|----------|
+| **v1.0** | ❌ No database connection | ⚠️ Contains vulnerabilities | Basic security scanning demos |
+| **v1.1** | ❌ No database connection | ✅ Vulnerabilities fixed | Secure baseline comparison |
+| **v2.0** | ✅ PostgreSQL integration | ⚠️ Contains vulnerabilities | Advanced security scenarios |
+| **v2.1** | ✅ PostgreSQL integration | ✅ Vulnerabilities fixed | Production-ready secure version |
+
+### 🛡️ Security Training Scenarios
+
+- **Vulnerability Detection**: Use scanning tools to identify security issues between versions
+- **Remediation Practice**: Compare vulnerable (.0) vs secure (.1) versions
+- **Database Security**: Analyze connection handling and credential management in v2.x
+- **Runtime Monitoring**: Practice security monitoring with tools like Falco (in production environments)
+
+### 🎯 Target Audience
+
+- **DevOps Engineers** learning container security
+- **Security Professionals** exploring Kubernetes security tools
+- **Students** in cybersecurity and cloud computing courses
+- **Workshop Participants** in container orchestration training
+
+---
+
 ## 🚀 Features
 
 - **🌡️ Temperature Conversion**: Convert between Celsius and Fahrenheit via web interface and REST API
@@ -82,6 +119,47 @@ temperature-converter/
    ```bash
    ./dev.sh k8s-delete
    ```
+
+---
+
+## 🔄 Version Management for Security Training
+
+### Switching Between Versions
+
+```bash
+# Access vulnerable versions (for training)
+git checkout v1.0    # No database, with vulnerabilities
+git checkout v2.0    # PostgreSQL, with vulnerabilities
+
+# Access secure versions (for comparison)
+git checkout v1.1    # No database, vulnerabilities fixed
+git checkout v2.1    # PostgreSQL, vulnerabilities fixed
+
+# Return to development branch
+git checkout v2.0    # Current development version
+```
+
+### Training Workshop Flow
+
+1. **Start with v1.0**: Basic vulnerability scanning demonstration
+2. **Upgrade to v1.1**: Show remediation and security improvements
+3. **Move to v2.0**: Introduce database security scenarios
+4. **Finish with v2.1**: Demonstrate complete secure implementation
+
+### Security Scanning Workflow
+
+```bash
+# Scan vulnerable version
+git checkout v2.0
+snyk test --severity-threshold=medium
+
+# Compare with secure version  
+git checkout v2.1
+snyk test --severity-threshold=medium
+
+# Analyze differences
+git diff v2.0..v2.1 -- src/
+```
 
 ---
 
@@ -470,12 +548,24 @@ trivy image -f json -o trivy-report.json nilsonsangy/temperature-converter:v2.0
 
 ## 🤝 Contributing
 
+**Educational Project Notice**: This application is designed for security training purposes. Contributions should maintain the educational value and security scenarios that make this project useful for learning container orchestration security.
+
+### Contributing Guidelines
+
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Make your changes and test them
 4. Commit your changes: `git commit -m 'Add amazing feature'`
 5. Push to the branch: `git push origin feature/amazing-feature`
 6. Open a Pull Request
+
+### Security Training Contributions
+
+When contributing to this educational project, consider:
+- **Vulnerability Examples**: Maintain intentional vulnerabilities in .0 versions for training
+- **Security Fixes**: Implement proper fixes in .1 versions to demonstrate remediation
+- **Documentation**: Include educational notes explaining security concepts
+- **Testing Scenarios**: Add examples that help learners understand security tools
 
 ---
 
