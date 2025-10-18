@@ -116,6 +116,7 @@ case "$1" in
         ;;
     "*")
         echo "🌡️ Temperature Converter Development Helper"
+        echo "🌡️ Temperature Converter Development Helper"
         echo ""
         echo "Available commands:"
         echo "  start       - Start with Docker Compose"
@@ -125,11 +126,11 @@ case "$1" in
         echo "  db          - Connect to PostgreSQL database"
         echo "  test        - Run application tests"
         echo "  rebuild     - Rebuild and restart"
-        echo "  k8s-deploy  - Deploy to Kubernetes"
-        echo "  k8s-delete  - Remove from Kubernetes"
-        echo "  k8s-status  - Show Kubernetes status"
-        echo "  k8s-url     - Show all access URLs"
-        echo "  k8s-forward - Port forward to localhost:8080"
+        echo "  k8s-deploy     - Deploy to Kubernetes"
+        echo "  k8s-delete     - Remove from Kubernetes"
+        echo "  k8s-status     - Show Kubernetes status"
+        echo "  k8s-url        - Show all access URLs"
+        echo "  k8s-forward    - Port forward to localhost:8080"
         echo ""
         echo "Usage: ./dev.sh [command]"
         ;;

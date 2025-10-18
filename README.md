@@ -184,17 +184,239 @@ npm test
 
 ## 🔍 Security Scanning
 
-Scan the Docker image for vulnerabilities using Trivy:
+### Snyk Security Scanning
+
+Snyk provides comprehensive security scanning for dependencies, containers, Infrastructure as Code, and source code.
+
+#### Prerequisites
 
 ```bash
-# Basic scan
-trivy image temperature-converter:latest
+# Install Snyk CLI
+npm install -g snyk
+
+# Authenticate with Snyk (requires browser)
+snyk auth
+```
+
+#### Dependencies Vulnerability Scan
+
+```bash
+# Navigate to source directory and scan dependencies
+cd src
+snyk test
+
+# Scan with specific severity threshold
+snyk test --severity-threshold=medium
+
+# Generate JSON report
+snyk test --json > snyk-dependencies-report.json
+```
+
+#### Container Image Scan
+
+```bash
+# Scan the Docker image for vulnerabilities
+snyk container test nilsonsangy/temperature-converter:v2.0
+
+# Scan with severity threshold
+snyk container test nilsonsangy/temperature-converter:v2.0 --severity-threshold=high
+
+# Monitor container in Snyk dashboard
+snyk container monitor nilsonsangy/temperature-converter:v2.0
+```
+
+#### Kubernetes Configuration Scan
+
+```bash
+# Scan Kubernetes manifests for security issues
+snyk iac test k8s/deploy.yaml
+
+# Scan with specific severity
+snyk iac test k8s/deploy.yaml --severity-threshold=medium
+
+# Generate detailed report
+snyk iac test k8s/deploy.yaml --json > snyk-k8s-report.json
+```
+
+#### Source Code Security Scan
+
+```bash
+# Navigate to source directory and scan code
+cd src
+snyk code test
+
+# Scan with severity threshold
+snyk code test --severity-threshold=high
+```
+
+#### Comprehensive Security Workflow
+
+```bash
+# 1. Dependencies vulnerabilities
+cd src && snyk test --severity-threshold=medium
+
+# 2. Container image vulnerabilities  
+snyk container test nilsonsangy/temperature-converter:v2.0
+
+# 3. Kubernetes configuration security
+snyk iac test k8s/deploy.yaml
+
+# 4. Source code security analysis
+cd src && snyk code test
+```
+
+### Falco Runtime Security Monitoring
+
+Falco provides real-time threat detection and runtime security monitoring for Kubernetes environments.
+
+#### Prerequisites
+
+```bash
+# Install Falco on Kubernetes cluster
+helm repo add falcosecurity https://falcosecurity.github.io/charts
+helm repo update
+helm install falco falcosecurity/falco --namespace falco --create-namespace
+
+# Alternative: Install as DaemonSet
+kubectl apply -f https://raw.githubusercontent.com/falcosecurity/deploy-kubernetes/main/kubernetes/falco-daemonset-config.yaml
+```
+
+#### Monitor Application Runtime Security
+
+```bash
+# View Falco logs for security events
+kubectl logs -n falco -l app.kubernetes.io/name=falco -f
+
+# Check for specific application alerts
+kubectl logs -n falco -l app.kubernetes.io/name=falco | grep temperature-converter
+
+# Monitor container anomalies
+kubectl logs -n falco -l app.kubernetes.io/name=falco | grep "Anomalous container behavior"
+```
+
+#### Custom Falco Rules for Temperature Converter
+
+Create `falco-rules.yaml` for application-specific monitoring:
+
+```yaml
+# Custom rules for temperature-converter security
+- rule: Suspicious Network Activity in Temperature App
+  desc: Detect unexpected network connections from temperature-converter
+  condition: >
+    (container.name startswith "temperature-converter" and
+     (fd.type=ipv4 or fd.type=ipv6) and
+     not fd.ip in (postgres_ips, allowed_external_ips))
+  output: >
+    Suspicious network connection from temperature-converter
+    (container=%container.name pid=%proc.pid connection=%fd.name)
+  priority: WARNING
+
+- rule: Unauthorized File Access in Temperature App  
+  desc: Detect unauthorized file system access
+  condition: >
+    (container.name startswith "temperature-converter" and
+     open_read and not fd.name startswith "/app" and
+     not fd.name startswith "/usr" and not fd.name startswith "/lib")
+  output: >
+    Unauthorized file access in temperature-converter
+    (container=%container.name file=%fd.name pid=%proc.pid)
+  priority: WARNING
+
+- rule: Database Connection Anomaly
+  desc: Detect unusual database connection patterns
+  condition: >
+    (container.name startswith "temperature-converter" and
+     (fd.type=ipv4 and fd.sport!=5432 and proc.name=node))
+  output: >
+    Unusual database connection from temperature-converter
+    (container=%container.name connection=%fd.name process=%proc.name)
+  priority: NOTICE
+```
+
+#### Deploy Custom Rules
+
+```bash
+# Apply custom Falco rules
+kubectl create configmap falco-rules --from-file=falco-rules.yaml -n falco
+kubectl patch configmap falco -n falco --patch '{"data":{"falco.yaml":"rules_file:\n  - /etc/falco/falco_rules.yaml\n  - /etc/falco/falco-rules.yaml"}}'
+
+# Restart Falco to load new rules
+kubectl rollout restart daemonset/falco -n falco
+```
+
+#### Real-time Security Monitoring
+
+```bash
+# Stream security events in real-time
+kubectl logs -n falco -l app.kubernetes.io/name=falco -f | grep -E "(temperature-converter|postgres|WARNING|CRITICAL)"
+
+# Export security events to file
+kubectl logs -n falco -l app.kubernetes.io/name=falco --since=1h > security-events.log
+
+# Check for critical security violations
+kubectl logs -n falco -l app.kubernetes.io/name=falco | grep CRITICAL
+```
+
+#### Easy Setup with Helper Script
+
+Use the provided `falco-setup.sh` script for simplified Falco deployment:
+
+```bash
+# Complete Falco setup for Temperature Converter
+./falco-setup.sh install       # Install Falco on cluster
+./falco-setup.sh deploy-rules  # Deploy custom security rules
+./falco-setup.sh monitor       # Start real-time monitoring
+
+# Management commands
+./falco-setup.sh status        # Check Falco status
+./falco-setup.sh alerts        # View recent security alerts  
+./falco-setup.sh test          # Test rules with simulated events
+```
+
+#### Integration with Alerting Systems
+
+```bash
+# Send Falco alerts to Slack (requires Falcosidekick)
+helm install falcosidekick falcosecurity/falcosidekick \
+  --set config.slack.webhookurl="YOUR_SLACK_WEBHOOK" \
+  --namespace falco
+
+# Send alerts to file for CI/CD integration
+kubectl logs -n falco -l app.kubernetes.io/name=falco --since=5m | \
+  grep -E "WARNING|CRITICAL" > /tmp/security-alerts.txt
+```
+
+#### Security Benefits for Temperature Converter
+
+Falco enhances your project security by detecting:
+
+1. **🌐 Network Anomalies**: Unauthorized connections from your app containers
+2. **📁 File System Abuse**: Unexpected file access outside allowed directories  
+3. **🔐 Privilege Escalation**: Attempts to gain unauthorized system access
+4. **🗄️ Database Attacks**: Suspicious PostgreSQL access patterns
+5. **⚡ Runtime Threats**: Malicious processes or container breakouts
+6. **🔑 Secrets Exposure**: Unauthorized environment variable access
+
+**Example Security Scenarios Detected:**
+- Container trying to access `/etc/passwd` or other system files
+- Unexpected network connections to external IPs
+- Processes running with elevated privileges
+- Database connections from non-application processes
+- File modifications in sensitive directories
+
+### Alternative: Trivy Security Scanner
+
+For environments where Snyk is not available, use Trivy:
+
+```bash
+# Basic container scan
+trivy image nilsonsangy/temperature-converter:v2.0
 
 # High/Critical only (CI-friendly)
-trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 temperature-converter:latest
+trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 nilsonsangy/temperature-converter:v2.0
 
 # JSON report
-trivy image -f json -o trivy-report.json temperature-converter:latest
+trivy image -f json -o trivy-report.json nilsonsangy/temperature-converter:v2.0
 ```
 
 ---

@@ -1,0 +1,93 @@
+# Custom Falco Rules for Temperature Converter Security Monitoring
+# These rules detect suspicious behavior specific to the temperature-converter application
+
+- rule: Suspicious Network Activity in Temperature App
+  desc: Detect unexpected network connections from temperature-converter pods
+  condition: >
+    (k8s.pod.name contains "temperature-converter" and
+     (fd.type in (ipv4, ipv6)) and
+     not fd.ip in (postgres_allowed_ips, "127.0.0.1", "::1") and
+     not fd.name contains ":8080")
+  output: >
+    Suspicious network connection from temperature-converter
+    (pod=%k8s.pod.name namespace=%k8s.ns.name connection=%fd.name user=%user.name)
+  priority: WARNING
+  tags: [network, temperature-converter, runtime]
+
+- rule: Unauthorized File Access in Temperature App  
+  desc: Detect unauthorized file system access outside allowed directories
+  condition: >
+    (k8s.pod.name contains "temperature-converter" and
+     open_read and 
+     not fd.name startswith "/app" and
+     not fd.name startswith "/usr" and 
+     not fd.name startswith "/lib" and
+     not fd.name startswith "/proc" and
+     not fd.name startswith "/sys" and
+     not fd.name startswith "/tmp")
+  output: >
+    Unauthorized file access in temperature-converter
+    (pod=%k8s.pod.name file=%fd.name process=%proc.name user=%user.name)
+  priority: WARNING
+  tags: [filesystem, temperature-converter, runtime]
+
+- rule: Database Connection Anomaly
+  desc: Detect unusual database connection patterns or unauthorized DB access
+  condition: >
+    (k8s.pod.name contains "temperature-converter" and
+     (fd.type=ipv4 and not fd.sport=5432 and 
+      (proc.name contains "node" or proc.name contains "npm")) and
+     not fd.ip in ("127.0.0.1"))
+  output: >
+    Unusual database connection from temperature-converter
+    (pod=%k8s.pod.name connection=%fd.name process=%proc.name command=%proc.cmdline)
+  priority: NOTICE
+  tags: [database, temperature-converter, runtime]
+
+- rule: Unexpected Process Execution in Container
+  desc: Detect execution of unexpected processes in temperature-converter containers
+  condition: >
+    (k8s.pod.name contains "temperature-converter" and
+     spawned_process and
+     not proc.name in (node, npm, sh, bash, cat, ls, ps, grep, awk, sed))
+  output: >
+    Unexpected process execution in temperature-converter container
+    (pod=%k8s.pod.name process=%proc.name command=%proc.cmdline user=%user.name)
+  priority: ERROR
+  tags: [process, temperature-converter, runtime]
+
+- rule: Container Privilege Escalation Attempt
+  desc: Detect attempts to escalate privileges in temperature-converter containers
+  condition: >
+    (k8s.pod.name contains "temperature-converter" and
+     (spawned_process and proc.name in (su, sudo, passwd, chsh)) or
+     (open_write and fd.name in (/etc/passwd, /etc/shadow, /etc/sudoers)))
+  output: >
+    Privilege escalation attempt in temperature-converter
+    (pod=%k8s.pod.name process=%proc.name file=%fd.name user=%user.name)
+  priority: CRITICAL
+  tags: [privilege-escalation, temperature-converter, runtime]
+
+- rule: PostgreSQL Suspicious Activity
+  desc: Monitor suspicious activities in PostgreSQL containers
+  condition: >
+    (k8s.pod.name contains "postgres" and
+     ((spawned_process and not proc.name in (postgres, initdb, pg_ctl, psql)) or
+      (open_write and fd.name contains "/var/lib/postgresql" and not proc.name=postgres)))
+  output: >
+    Suspicious PostgreSQL activity detected
+    (pod=%k8s.pod.name process=%proc.name file=%fd.name user=%user.name)
+  priority: WARNING
+  tags: [database, postgres, runtime]
+
+- rule: Sensitive Environment Variable Access
+  desc: Detect access to sensitive environment variables
+  condition: >
+    (k8s.pod.name contains "temperature-converter" and
+     (open_read and (fd.name contains "environ" or fd.name contains "cmdline")) and
+     proc.name != "node")
+  output: >
+    Sensitive environment variable access in temperature-converter
+    (pod=%k8s.pod.name process=%proc.name file=%fd.name user=%user.name)
+  priority: WARNING
+  tags: [environment, temperature-converter, runtime]

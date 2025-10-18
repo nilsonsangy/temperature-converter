@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: falco
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: falco-config
+  namespace: falco
+data:
+  falco.yaml: |
+    rules_file:
+      - /etc/falco/falco_rules.yaml
+    
+    time_format_iso_8601: true
+    json_output: true
+    json_include_output_property: true
+    log_stderr: true
+    log_level: info
+    priority: debug
+    
+    syscall_event_drops:
+      actions:
+        - log
+      rate: 0.03333
+      max_burst: 1000
+
+    webserver:
+      enabled: true
+      listen_port: 8765
+      k8s_healthz_endpoint: /healthz
+      ssl_enabled: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falco-simple
+  namespace: falco
+  labels:
+    app: falco-simple
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: falco-simple
+  template:
+    metadata:
+      labels:
+        app: falco-simple
+    spec:
+      containers:
+      - name: falco
+        image: falcosecurity/falco-no-driver:0.36.2
+        args:
+        - /usr/bin/falco
+        - --k8s-api
+        - --k8s-api-cert=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        - --k8s-api-token-file=/var/run/secrets/kubernetes.io/serviceaccount/token
+        env:
+        - name: FALCO_K8S_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        volumeMounts:
+        - name: falco-config
+          mountPath: /etc/falco
+        ports:
+        - containerPort: 8765
+          name: http
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8765
+          initialDelaySeconds: 60
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8765
+          initialDelaySeconds: 30
+          periodSeconds: 15
+      volumes:
+      - name: falco-config
+        configMap:
+          name: falco-config
+      serviceAccountName: falco-simple
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: falco-simple
+  namespace: falco
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: falco-simple
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "namespaces", "pods", "events", "services"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "daemonsets", "replicasets"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: falco-simple
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: falco-simple
+subjects:
+- kind: ServiceAccount
+  name: falco-simple
+  namespace: falco
